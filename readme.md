@@ -23,7 +23,7 @@ We should predict the tag set: {租房网,租房,搜房网}
 
 ## How to use
 
-1. Download the dataset,and put into data folder,run `prepare_data.py` clean data
+1. Download the [dataset](http://tcci.ccf.org.cn/conference/2018/dldoc/trainingdata06.rar),and put into `data` folder,run `prepare_data.py` to clean data
 
 2. train a model: `python main.py train --model rcnn `
 
