@@ -30,6 +30,7 @@ class TextCNNModel:
         self.settings = CNNSetting()
         self.n_filter_total = self.settings.n_filter * len(self.settings.filter_sizes)
         self.max_f1 = 0.0
+        self.is_training = True
 
         with tf.name_scope('Inputs'):
             self.title_input = tf.placeholder(tf.int64, [None, self.settings.title_len], name='title_inputs')
@@ -92,10 +93,10 @@ class TextCNNModel:
 
         print(f'{self.model_name} init finish')
 
-    def create_feed_dic(self, batch_data, keep_prob):
+    def create_feed_dic(self, batch_data):
         feed_dict = {self.title_input: batch_data['title_input'], self.detail_input: batch_data['detail_input'],
                      self.class_input: batch_data['class_input'],
-                     self.keep_prob: keep_prob}
+                     self.keep_prob: 0.5}
         return feed_dict
 
     def cnn_layer(self, X_inputs, n_step):

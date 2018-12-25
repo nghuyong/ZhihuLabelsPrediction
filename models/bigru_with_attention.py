@@ -28,6 +28,7 @@ class BiGRUAttentionModel:
         self.model_name = 'bigru'
         self.settings = BiGRUSetting()
         self.max_f1 = 0.0
+        self.is_training = True
 
         with tf.name_scope('Inputs'):
             self.title_input = tf.placeholder(tf.int64, [None, self.settings.title_len], name='title_inputs')
@@ -92,15 +93,17 @@ class BiGRUAttentionModel:
 
         print(f'{self.model_name} init finish')
 
-    def create_feed_dic(self, batch_data, keep_prob):
+    def create_feed_dic(self, batch_data):
         feed_dict = {self.title_input: batch_data['title_input'], self.detail_input: batch_data['detail_input'],
                      self.class_input: batch_data['class_input'],
                      self.title_length: batch_data['title_lengths'], self.detail_length: batch_data['detail_lengths'],
-                     self.keep_prob: keep_prob}
+                     self.keep_prob: 0.5}
         return feed_dict
 
     def stack_bi_gru_layer(self, embedded_input, sequence_length):
         def gru_cell():
+            if not self.is_training:
+                self.keep_prob = 1.0
             with tf.name_scope('gru_cell'):
                 cell = rnn.GRUCell(self.settings.bi_gru_hidden_dim, reuse=tf.get_variable_scope().reuse)
             return rnn.DropoutWrapper(cell, output_keep_prob=self.keep_prob)
