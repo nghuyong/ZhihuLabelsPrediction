@@ -16,7 +16,6 @@ from utils.eval import get_top_5_id, evaluate
 
 
 def train_model(model, sess):
-    model.is_training = True
     model.train_writer.add_graph(sess.graph)
     for epoch_index in range(model.settings.max_epoch):
         train_fetches = [model.loss, model.sigmoid_y_pred, model.train_op, model.global_step]
@@ -40,14 +39,13 @@ def train_model(model, sess):
 
 
 def test_model(model, sess, is_test_mod=False):
-    model.is_training = False
     batch_generator = generate_batch_data('test' if is_test_mod else 'dev', model.settings)
     all_predict = []
     all_ground_truth = []
     all_loss = 0
     batch_len = 0
     for index, batch in enumerate(batch_generator):
-        feed_dict = model.create_feed_dic(batch)
+        feed_dict = model.create_feed_dic(batch, is_training=False)
         loss, y_pred = sess.run([model.loss, model.sigmoid_y_pred], feed_dict)
         all_predict.extend(get_top_5_id(y_pred, model.settings.batch_size))
         all_ground_truth.extend(batch['ground_truth'])
@@ -63,15 +61,14 @@ def test_model(model, sess, is_test_mod=False):
             save_path = model.saver.save(sess, "./checkpoints/{}/{:.3f}_{:.3f}_{:.3f}.ckpt". \
                                          format(model.model_name, precision, recall, f1))
             print("find new best model,save to path: ", save_path)
-        if hasattr(model, 'train_writer'):
-            summary = tf.Summary(value=[
-                tf.Summary.Value(tag="Loss", simple_value=all_loss),
-                tf.Summary.Value(tag="precision", simple_value=precision),
-                tf.Summary.Value(tag="recall", simple_value=recall),
-                tf.Summary.Value(tag="F1", simple_value=f1),
-            ])
-            global_step = tf.train.global_step(sess, model.global_step)
-            model.train_writer.add_summary(summary, global_step=global_step)
+        summary = tf.Summary(value=[
+            tf.Summary.Value(tag="Loss", simple_value=all_loss),
+            tf.Summary.Value(tag="precision", simple_value=precision),
+            tf.Summary.Value(tag="recall", simple_value=recall),
+            tf.Summary.Value(tag="F1", simple_value=f1),
+        ])
+        global_step = tf.train.global_step(sess, model.global_step)
+        model.train_writer.add_summary(summary, global_step=global_step)
 
 
 def create_sess(checkpoint_path='', model=None):
