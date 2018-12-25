@@ -3,6 +3,7 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
 
+from models.model import BaseModel
 from models.utils import weight_variable, bias_variable
 
 
@@ -24,13 +25,11 @@ class CNNSetting:
     n_filter = 256
 
 
-class TextCNNModel:
+class TextCNNModel(BaseModel):
     def __init__(self):
-        self.model_name = 'cnn'
+        super().__init__('cnn')
         self.settings = CNNSetting()
         self.n_filter_total = self.settings.n_filter * len(self.settings.filter_sizes)
-        self.max_f1 = 0.0
-        self.is_training = True
 
         with tf.name_scope('Inputs'):
             self.title_input = tf.placeholder(tf.int64, [None, self.settings.title_len], name='title_inputs')

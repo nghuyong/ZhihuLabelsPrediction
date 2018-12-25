@@ -3,6 +3,7 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
 
+from models.model import BaseModel
 from models.utils import weight_variable, bias_variable, add_train_op
 
 
@@ -26,11 +27,10 @@ class RCNNSetting:
     n_filter = 256
 
 
-class RCNNModel:
+class RCNNModel(BaseModel):
     def __init__(self):
-        self.model_name = 'rcnn'
+        super().__init__('rcnn')
         self.settings = RCNNSetting()
-        self.max_f1 = 0.0
         self.n_filter_total = self.settings.n_filter * len(self.settings.filter_sizes)
 
         with tf.name_scope('Inputs'):
@@ -90,7 +90,7 @@ class RCNNModel:
         train
         """
         with tf.variable_scope('training_ops'):
-            self.train_op = add_train_op(lr=self.settings.lr, loss=self.loss)
+            self.train_op = add_train_op(lr=self.settings.lr, loss=self.loss, global_step=self.global_step)
 
         self.saver = tf.train.Saver(max_to_keep=1, name=self.model_name)
 

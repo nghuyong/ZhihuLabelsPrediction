@@ -79,7 +79,7 @@ def embedding(inputs,
         if scale:
             outputs = outputs * (num_units ** 0.5)
 
-    return outputs,lookup_table
+    return outputs, lookup_table
 
 
 def normalize(inputs,
@@ -273,7 +273,7 @@ def add_loss(y_pred, y_label):
     return loss
 
 
-def add_train_op(lr, loss):
+def add_train_op(lr, loss, global_step):
     optimizer = tf.train.AdamOptimizer(learning_rate=lr)
-    train_op = optimizer.minimize(loss)
+    train_op = optimizer.minimize(loss, global_step=global_step)
     return train_op
