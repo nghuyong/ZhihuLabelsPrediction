@@ -1,8 +1,6 @@
 import collections
 import pickle
 import random
-
-from utils.data_utils import build_voc, format_data
 import re
 import thulac
 import pandas as pd

@@ -23,8 +23,11 @@ We should predict the tag set: {租房网,租房,搜房网}
 
 ## How to use
 
-train a model: `python main.py train --model rcnn`
+1. Download the dataset,and put into data folder,run `prepare_data.py` clean data
 
-then
+2. train a model: `python main.py train --model rcnn `
 
-test a model: `python main.py test --model rcnn`
+    model choices=\['bigru', 'cnn', 'rcnn', 'transformer']
+
+3. test a model: `python main.py test --model rcnn`
+
