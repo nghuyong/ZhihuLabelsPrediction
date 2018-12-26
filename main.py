@@ -68,7 +68,7 @@ def test_model(model, sess, is_test_mod=False):
             tf.Summary.Value(tag="F1", simple_value=f1),
         ])
         global_step = tf.train.global_step(sess, model.global_step)
-        model.train_writer.add_summary(summary, global_step=global_step)
+        model.dev_writer.add_summary(summary, global_step=global_step)
 
 
 def create_sess(checkpoint_path='', model=None):
