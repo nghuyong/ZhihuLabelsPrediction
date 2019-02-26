@@ -29,18 +29,16 @@ class BertWrapper(BaseModel):
             self.input_mask = tf.placeholder(tf.int32, [None, self.settings.max_seq_length], name='input_mask')
             self.segment_ids = tf.placeholder(tf.int32, [None, self.settings.max_seq_length], name='segment_ids')
             self.labels = tf.placeholder(tf.float32, [None, self.settings.class_num], name='labels')
-
         bert_config = BertConfig.from_json_file('chinese_L-12_H-768_A-12/bert_config.json')
 
-        model = BertModel(
+        self.model = BertModel(
             config=bert_config,
-            is_training=self.is_training,
             input_ids=self.input_ids,
             input_mask=self.input_mask,
             token_type_ids=self.segment_ids,
             use_one_hot_embeddings=False)
 
-        output_layer = model.get_pooled_output()
+        output_layer = self.model.get_pooled_output()
         hidden_size = output_layer.shape[-1].value
         output_weights = tf.get_variable(
             "output_weights", [self.settings.class_num, hidden_size],
@@ -50,9 +48,7 @@ class BertWrapper(BaseModel):
             "output_bias", [self.settings.class_num], initializer=tf.zeros_initializer())
 
         with tf.variable_scope("loss"):
-            if self.is_training:
-                # I.e., 0.1 dropout
-                output_layer = tf.nn.dropout(output_layer, keep_prob=0.9)
+            output_layer = tf.nn.dropout(output_layer, keep_prob=1 - self.model.hidden_dropout_prob)
 
             logits = tf.matmul(output_layer, output_weights, transpose_b=True)
             logits = tf.nn.bias_add(logits, output_bias)
@@ -63,7 +59,9 @@ class BertWrapper(BaseModel):
         with tf.variable_scope('training_ops'):
             self.train_op = add_train_op(lr=self.settings.lr, loss=self.loss, global_step=self.global_step)
 
-    def create_feed_dic(self, batch_data):
+        self.saver = tf.train.Saver(max_to_keep=1, name=self.model_name)
+
+    def create_feed_dic(self, batch_data, is_training=True):
         max_seq_length = self.settings.max_seq_length
 
         all_input_ids = []
@@ -106,6 +104,8 @@ class BertWrapper(BaseModel):
             self.input_mask: all_input_mask,
             self.segment_ids: all_segment_ids,
             self.labels: all_labels,
+            self.model.hidden_dropout_prob: self.model.config.hidden_dropout_prob if is_training else 0,
+            self.model.attention_probs_dropout_prob: self.model.config.attention_probs_dropout_prob if is_training else 0
         }
 
 
