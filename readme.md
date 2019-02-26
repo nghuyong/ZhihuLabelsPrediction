@@ -1,6 +1,6 @@
 # ZhihuLabelsPrediction
 
-**Code for the article "[Automatic Tagging of Zhihu Questions"]()**
+**Code for the article "[Automatic Tagging of Zhihu Questions"](./paper.pdf)**
 
 ## Task Definition
 The task aims to tag questions in Zhihu with relevant tags from a collection
